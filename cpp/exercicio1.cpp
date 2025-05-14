@@ -4,12 +4,13 @@
 #include <cstdint>
 #include <array>
 
-// wanted to to try this way, teacher
-// i could have tried to use a switch with a bunch of cases in a switch here,
+// wanted to try this way, teacher
+// i could have tried to use a switch 
+// with a bunch of cases in a switch here,
 // it would have been more simple
 
 int searchInString(std::string_view stringToSearch) {
-	constexpr std::array<char, 21> whatToSearch { 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
+	constexpr std::array<char, 63> whatToSearch { 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U', 'b', 'B', 'c', 'C', 'd', 'D', 'f', 'F', 'g', 'G', 'h', 'H', 'j', 'J', 'k', 'l', 'L', 'm', 'M', 'n', 'N', 'p', 'P', 'q', 'Q', 'r', 'R', 's', 'S', 't', 'T', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ' };
 
 	int matches = 0;
 
