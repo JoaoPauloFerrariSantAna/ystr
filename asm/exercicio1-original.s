@@ -13,11 +13,8 @@
 # mostrar na tela
 
 .section .data
-	string: .int 65,83,83,69,77,66,76,89 # ASSEMBLY
+	string: .asciz "ASSEMBLY"
 
-	string_len: .int 8
-
-	INITIAL_MSG: .ascii "Iniciando verificacao"
 	NL: .ascii "\n"
 
 	num_buffer: .space 16
@@ -28,7 +25,7 @@
 # Função para obter o comprimento de uma string terminada em NULL (strlen)
 # Entrada: rdi = endereço da string
 # Saída: rax = tamanho da string
-strlen:
+_strlen:
     xor rax, rax      # Inicializa contador de comprimento
 .strlen_loop:
     cmp BYTE PTR [rdi + rax], 0 # Compara o byte atual com NULL
@@ -37,6 +34,7 @@ strlen:
     jmp .strlen_loop            # Próximo caractere
 .strlen_done:
     ret 
+
 _return:
 	mov rax,EXIT
 	mov rdi,SUCCESS
@@ -47,7 +45,7 @@ _return:
 # Efeito colateral: modifica rax, rsi, rdx
 _print_cstring:
     push rdi          # Salva o endereço da string (rdi)
-    call strlen       # Chama strlen, rax = tamanho da string
+    call _strlen       # Chama strlen, rax = tamanho da string
     pop rsi           # Restaura o endereço da string para rsi (argumento 2 para sys_write)
     mov rdx, rax      # rdx = tamanho da string (argumento 3 para sys_write)
     mov rax, 1        # syscall sys_write
@@ -82,39 +80,66 @@ _int_to_string:
 .convert_done:
     ret                   # rdi aponta para o início da string numérica
 
-_init_prog:
-	xor r12d,r12d 	# i = 0
-	# xor r8d,r8d		# total
-
-loop_start:
-	mov eax,r12d 
-    call _int_to_string  # Converte para string em rdi
-    call _print_cstring
-
-	mov rdi, OFFSET NL
-	call _print_cstring
-
-	inc r12d
-	cmp r12d, [string_len] # i++
-	jl loop_start
-
-loop_done:
-	xor rdi,rdi
-	ret
-
-
 _start:
-	mov rdi, OFFSET INITIAL_MSG
-	call _print_cstring
+	# https://stackoverflow.com/questions/44534685/how-to-index-through-a-string-in-assembly
+	xor rcx, rcx
+	mov rsi, OFFSET string	# RSI -> string
 
-	mov rdi, OFFSET NL
-	call _print_cstring
+.loop_start:
+	cmp BYTE PTR [rsi+rcx],0
+	je .loop_start_done
+	inc rcx
+	jmp .loop_start
 
-	mov rdi, OFFSET NL
-	call _print_cstring
+.loop_start_done:
+	mov r8, rcx
 
-	xor rdi,rdi
+	# a partir daqui não posso usar mais _print_cstring
 
-	call _init_prog
+    mov rax, 1              # syscall: sys_write
+    mov rdi, 1              # stdout
+    # rsi ainda aponta para offset str (deixado pelo cálculo do tamanho)
+    mov rdx, r8             # Usar o comprimento salvo em r8
+    syscall
 
+    # Imprimir nova linha
+    mov rax, 1              # syscall: sys_write
+    mov rdi, 1              # stdout
+    mov rsi, OFFSET NL      # RSI é modificado aqui para apontar para nl
+    mov rdx, 1
+    syscall
+
+    # Imprimir nova linha
+    mov rax, 1              # syscall: sys_write
+    mov rdi, 1              # stdout
+    mov rsi, OFFSET NL      # RSI é modificado aqui para apontar para nl
+    mov rdx, 1
+    syscall
+
+	mov r9, 0
+.loop_check_for_pattern:
+	cmp r9,r8
+	jge .loop_done
+
+	mov r10, r8
+	dec r10
+	sub r10,r9
+
+	mov al, BYTE PTR [rsi+r9]
+
+	cmp al,65 # ascii para "A"
+	je .test
+
+	cmp al,83 ## ascii para
+	je .loop_increment_pattern_count
+
+	inc r9
+
+.loop_increment_pattern_count:
+	# eu não sei como continuar a partir daqui
+	# eu sei que está guardado em %al,
+	# mas eu nem sei como verificar: com GDB, eu consegui 
+	# printrar um número qualquer, mas eu não sei o que representa
+
+.loop_done:
 	call _return

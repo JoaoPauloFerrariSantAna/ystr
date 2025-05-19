@@ -1,4 +1,4 @@
-FILENAME := exercicio1
+FILENAME := exercicio2
 ASSEMBLY:= $(FILENAME).s
 MONTAGE := $(FILENAME).out
 BINARY := $(FILENAME).bin
